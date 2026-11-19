@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Life, My Story</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400;1,500&family=Newsreader:ital,opsz,wght@0,6..72,300..500;1,6..72,300..400&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* Layout: jurnal sinematik di atas video hitam-putih; timeline vertikal di tengah (desktop) atau di kiri (HP). */
+:root {
+  --bg: #0a0a0b;
+  --ink: #e6e6e3;
+  --mute: #8f8f93;
+  --line: #2b2b2f;
+  --silver: #c8c8c4;
+  --panel: rgba(14, 14, 16, 0.74);
+  --font-display: "Bodoni Moda", "Didot", Georgia, serif;
+  --font-body: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 19px;
+  line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+  overflow-x: hidden;
+}
+
+/* ---------- latar sinematik ---------- */
+.bg-video {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: -3;
+  filter: grayscale(1) brightness(0.48) contrast(1.15);
+}
+.bg-shade {
+  position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(10,10,11,0) 0%, rgba(10,10,11,0.75) 85%),
+    linear-gradient(180deg, rgba(10,10,11,0.55), rgba(10,10,11,0.35) 40%, rgba(10,10,11,0.7));
+}
+.grain {
+  position: fixed; inset: -50%; z-index: -1; pointer-events: none; opacity: 0.09;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain 1.2s steps(6) infinite;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); } 20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -3%); } 60% { transform: translate(-2%, -1%); }
+  80% { transform: translate(3%, 3%); } 100% { transform: translate(0, 0); }
+}
+.progress {
+  position: fixed; left: 0; top: env(safe-area-inset-top, 0px); height: 2px; width: 100%;
+  background: var(--silver); transform-origin: 0 50%; transform: scaleX(var(--scroll, 0));
+  z-index: 20; opacity: 0.85;
+}
+
+/* ---------- hero ---------- */
+.wrap { max-width: 1080px; margin: 0 auto; }
+.hero { padding-block: clamp(72px, 14vh, 140px) clamp(40px, 8vh, 80px); text-align: left; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--mute);
+}
+.hero h1 {
+  font-family: var(--font-display); font-weight: 400; margin: 18px 0 0;
+  font-size: clamp(52px, 11vw, 132px); line-height: 0.95; letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.hero h1 em { font-style: italic; color: var(--silver); display: block; padding-left: 0.6em; }
+.hero p.lede { max-width: 34em; color: var(--mute); margin: 28px 0 0; font-size: 20px; }
+.hero .by { margin-top: 36px; display: flex; align-items: center; gap: 16px; }
+.hero .by::before { content: ""; width: 56px; height: 1px; background: var(--silver); }
+.cue {
+  margin-top: 56px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--mute); display: inline-flex; align-items: center; gap: 12px;
+}
+.cue i { width: 1px; height: 36px; background: linear-gradient(var(--silver), transparent); animation: drip 2.2s ease-in-out infinite; transform-origin: top; }
+@keyframes drip { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+
+/* ---------- timeline ---------- */
+.tl { position: relative; padding-block: 24px 80px; }
+.tl::before, .tl::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; margin-left: -0.5px;
+}
+.tl::before { background: var(--line); }
+.tl::after {
+  background: linear-gradient(var(--silver), #fff); box-shadow: 0 0 12px rgba(255,255,255,0.35);
+  transform-origin: top; transform: scaleY(var(--tl, 0));
+}
+.entry {
+  position: relative; display: grid; grid-template-columns: 1fr 72px 1fr;
+  margin-bottom: clamp(48px, 9vw, 110px);
+}
+.entry .card { grid-column: 1; grid-row: 1; }
+.entry:nth-child(even) .card { grid-column: 3; }
+.node {
+  grid-column: 2; grid-row: 1; justify-self: center; margin-top: 30px;
+  width: 15px; height: 15px; border-radius: 50%; background: var(--bg);
+  border: 1px solid var(--mute); position: relative; z-index: 2;
+  transition: background 0.6s, border-color 0.6s, box-shadow 0.6s;
+}
+.entry.in .node { background: #fff; border-color: #fff; box-shadow: 0 0 0 6px rgba(255,255,255,0.08), 0 0 22px rgba(255,255,255,0.5); }
+
+.card {
+  background: var(--panel); border: 1px solid var(--line);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  padding: clamp(22px, 3.4vw, 40px); min-width: 0;
+}
+.card .tag {
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--mute); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center;
+}
+.card .tag b { font-weight: 400; color: var(--silver); }
+.card h2 {
+  font-family: var(--font-display); font-weight: 400; font-size: clamp(32px, 4.4vw, 50px);
+  line-height: 1.05; margin: 14px 0 0; letter-spacing: -0.01em; text-wrap: balance;
+}
+.card h2 em { color: var(--silver); }
+.story p { margin: 18px 0 0; max-width: 36em; }
+.story p:first-child { margin-top: 20px; }
+.pull {
+  font-family: var(--font-display); font-style: italic; font-size: clamp(22px, 2.6vw, 28px);
+  line-height: 1.35; border-left: 1px solid var(--silver); padding-left: 18px; color: var(--silver);
+}
+.more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.7s cubic-bezier(.2,.7,.2,1); }
+.more > div { overflow: hidden; min-height: 0; opacity: 0; transition: opacity 0.5s; }
+.card.open .more { grid-template-rows: 1fr; }
+.card.open .more > div { opacity: 1; transition-delay: 0.15s; }
+.btn {
+  margin-top: 26px; appearance: none; background: transparent; color: var(--ink); cursor: pointer;
+  border: 1px solid var(--mute); padding: 11px 20px; font-family: var(--font-mono);
+  font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 12px; transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+.btn:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn:focus-visible, a:focus-visible { outline: 2px solid var(--silver); outline-offset: 3px; }
+.btn .plus { display: inline-block; transition: transform 0.4s; font-size: 15px; line-height: 1; }
+.card.open .btn .plus { transform: rotate(45deg); }
+
+figure { margin: 22px 0 0; position: relative; overflow: hidden; border: 1px solid var(--line); }
+figure img {
+  display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; max-width: 100%;
+  filter: grayscale(1) contrast(1.08) brightness(0.92); transition: transform 1.6s ease, filter 0.8s;
+}
+figure.top img { object-position: 60% 20%; }
+figure.p-face img { object-position: 50% 32%; }
+figure.color:hover img { filter: grayscale(0) contrast(1.05) brightness(1); }
+figure:hover img { transform: scale(1.04); filter: grayscale(1) contrast(1.12) brightness(1); }
+figcaption {
+  position: absolute; left: 0; bottom: 0; right: 0; padding: 26px 14px 10px;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--silver); background: linear-gradient(transparent, rgba(0,0,0,0.8));
+}
+
+.sign { font-family: var(--font-display); font-style: italic; font-size: 30px; color: var(--silver); margin-top: 26px; }
+
+footer {
+  text-align: center; padding-block: 30px 60px; color: var(--mute);
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.24em; text-transform: uppercase;
+}
+
+/* ---------- animasi scroll ---------- */
+.js .rv { opacity: 0; transform: translateY(46px); transition: opacity 0.9s ease, transform 0.9s cubic-bezier(.2,.7,.2,1); }
+.js .entry .card.rv { transform: translateX(-46px); }
+.js .entry:nth-child(even) .card.rv { transform: translateX(46px); }
+.js .rv.in, .js .entry.in .card.rv { opacity: 1; transform: none; }
+.js .entry.rv { opacity: 1; transform: none; }
+.js .entry .node { opacity: 0; transition: opacity 0.6s, background 0.6s, border-color 0.6s, box-shadow 0.6s; }
+.js .entry.in .node { opacity: 1; }
+
+/* ---------- HP ---------- */
+@media (max-width: 820px) {
+  body { font-size: 18px; }
+  .tl::before, .tl::after { left: 18px; }
+  .entry { grid-template-columns: 36px 1fr; }
+  .entry .card, .entry:nth-child(even) .card { grid-column: 2; }
+  .node { grid-column: 1; margin-left: 11px; justify-self: start; }
+  .js .entry .card.rv, .js .entry:nth-child(even) .card.rv { transform: translateY(40px); }
+  .hero h1 em { padding-left: 0.3em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rv, .card, .more, .more > div, .node { transition: none !important; }
+  .js .rv, .js .entry .card.rv, .js .entry .node { opacity: 1 !important; transform: none !important; }
+  .grain, .cue i { animation: none; }
+  html { scroll-behavior: auto; }
+}
+</style>
+
+</head>
+<body>
+<video class="bg-video" id="bgv" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+  <source src="bg.mp4" type="video/mp4">
+</video>
+<div class="bg-shade"></div>
+<div class="grain"></div>
+<div class="progress" id="bar"></div>
+
+<main class="wrap">
+
+  <!-- ===================== HERO ===================== -->
+  <header class="hero">
+    <div class="eyebrow rv">Jurnal digital · Cerita kehidupan</div>
+    <h1 class="rv">My Life,<em>My Story</em></h1>
+    <p class="lede rv">Halaman ini adalah ruang pribadi Biel Weakers untuk menuliskan perjalanan hidupnya, dari awal sampai pesan untuk siapa pun yang singgah membaca.</p>
+    <div class="by rv"><span class="eyebrow">Ditulis oleh Biel Weakers</span></div>
+    <a class="cue rv" href="#beginning" style="text-decoration:none"><i></i>Gulir untuk membaca</a>
+    <div class="rv" style="margin-top:28px"><a class="btn" href="songs.html" style="text-decoration:none"><span class="label">Dengarkan Lagu Pilihan</span><span class="plus">&rarr;</span></a></div>
+  </header>
+
+  <!--
+    ==========================================================
+    CARA MENGEDIT CERITA
+    Setiap bab di bawah punya blok yang diberi komentar:
+      - <p class="preview">  → paragraf pembuka (selalu terlihat)
+      - <div class="story">  → cerita lengkap (muncul saat "Read More")
+      - .tag                 → label bab dan tahun/periode
+    Ganti teks di antara tag <p>...</p>. Tambah paragraf baru
+    dengan menyalin satu baris <p>...</p>.
+    ==========================================================
+  -->
+
+  <section class="tl" id="timeline">
+
+    <!-- ========== 1. MY BEGINNING ========== -->
+    <article class="entry rv" id="beginning">
+      <div class="card rv">
+        <div class="tag"><b>Bab I</b><span>Awal cerita</span></div>
+        <h2>My <em>Beginning</em></h2>
+        <figure><img src="img2.jpg" alt="Ilustrasi hitam putih wajah berambut perak, separuh tertutup bayangan" loading="lazy"><figcaption>Awal yang sunyi</figcaption></figure>
+        <!-- EDIT: paragraf pembuka -->
+        <div class="story"><p class="preview">Setiap orang memiliki awal cerita yang berbeda. Ada yang tumbuh dengan banyak kebahagiaan, ada yang harus belajar memahami dunia lebih cepat dari yang seharusnya. Dan aku percaya, setiap awal memiliki alasan mengapa ia membawa seseorang menjadi dirinya yang sekarang.</p></div>
+        <div class="more"><div>
+          <!-- EDIT: cerita lengkap -->
+          <div class="story">
+            <p>Namaku Biel Weakers. Aku hanyalah seseorang yang sedang menjalani hidup, melewati hari demi hari, dan perlahan mengenal diriku sendiri. Aku tidak tahu akan seperti apa perjalanan ini berakhir, tetapi aku tahu bahwa setiap langkah kecil yang kuambil akan menjadi bagian dari cerita yang suatu hari nanti bisa kuingat kembali.</p>
+            <p>Aku bukan seseorang yang memiliki semua jawaban. Terkadang aku mengerti apa yang kuinginkan, terkadang aku justru bingung dengan arah yang sedang kutuju. Namun, bukankah itu bagian dari kehidupan? Kita tidak selalu harus mengetahui seluruh jalan untuk berani melangkah.</p>
+            <p>Bagiku, kehidupan bukan hanya tentang bagaimana seseorang memulai, melainkan tentang bagaimana ia terus berjalan meskipun belum mengetahui apa yang menunggunya di depan.</p>
+            <p>Dan inilah awal ceritaku. Bukan cerita yang sempurna, bukan pula cerita yang selalu indah. Ini adalah ceritaku sendiri, yang masih terus kutulis, satu hari demi satu hari.</p>
+          </div>
+        </div></div>
+        <button class="btn" type="button" aria-expanded="false"><span class="label">Read More</span><span class="plus">+</span></button>
+      </div>
+      <span class="node" aria-hidden="true"></span>
+    </article>
+
+    <!-- ========== 2. ABOUT ME ========== -->
+    <article class="entry rv" id="about">
+      <div class="card rv">
+        <div class="tag"><b>Bab II</b><span>Tentang diriku</span></div>
+        <h2>About <em>Me</em></h2>
+        <figure class="top"><img src="img1.jpg" alt="Ilustrasi serigala putih yang menggeram di belakang sosok berambut perak" loading="lazy"><figcaption>Sisi yang tenang, sisi yang liar</figcaption></figure>
+        <!-- EDIT: paragraf pembuka -->
+        <div class="story"><p class="preview">Jika seseorang bertanya siapa diriku, mungkin aku membutuhkan waktu untuk menjawabnya. Bukan karena aku tidak mengenal diriku sendiri, tetapi karena manusia tidak pernah sesederhana satu kalimat.</p></div>
+        <div class="more"><div>
+          <!-- EDIT: cerita lengkap -->
+          <div class="story">
+            <p>Aku adalah Biel Weakers. Seseorang yang masih belajar memahami pikirannya sendiri, mengenali apa yang disukai, dan mencari tahu hal-hal yang benar-benar berarti dalam hidupnya.</p>
+            <p>Aku menyukai dunia game, terutama Roblox. Bagiku, game bukan hanya tentang bermain atau menghabiskan waktu. Ada kesenangan tersendiri ketika menjelajahi dunia baru, mencoba hal berbeda, dan menikmati pengalaman yang tidak selalu bisa ditemukan dalam kehidupan sehari-hari.</p>
+            <p>Namun, aku tahu bahwa diriku tidak hanya terdiri dari hal-hal yang kusukai. Ada pemikiran yang tidak selalu kuucapkan, perasaan yang terkadang sulit dijelaskan, dan sisi diriku yang mungkin tidak diketahui banyak orang.</p>
+            <p>Aku tidak ingin menjadi seseorang yang harus selalu terlihat sempurna di mata orang lain. Aku hanya ingin menjadi diriku sendiri, berkembang dengan caraku, dan belajar dari setiap pengalaman yang datang.</p>
+            <p>Mungkin aku belum sepenuhnya memahami siapa diriku. Tetapi aku percaya, mengenal diri sendiri adalah perjalanan yang tidak harus selesai dalam satu malam.</p>
+            <p>Aku masih dalam proses. Masih bertumbuh, masih belajar, dan masih mencari versi diriku yang ingin kuwujudkan.</p>
+          </div>
+        </div></div>
+        <button class="btn" type="button" aria-expanded="false"><span class="label">Read More</span><span class="plus">+</span></button>
+      </div>
+      <span class="node" aria-hidden="true"></span>
+    </article>
+
+    <!-- ========== 3. MY MEMORIES ========== -->
+    <article class="entry rv" id="memories">
+      <div class="card rv">
+        <div class="tag"><b>Bab III</b><span>Kenangan</span></div>
+        <h2>My <em>Memories</em></h2>
+        <figure class="p-face"><img src="img4.jpg" alt="Ilustrasi sosok berkerudung putih dengan kalung salib, menatap dari balik rambut" loading="lazy"><figcaption>Yang tersimpan</figcaption></figure>
+        <!-- EDIT: kutipan / kalimat favorit (opsional) -->
+        <div class="story"><p class="pull">Tidak semua kenangan harus sempurna agar layak disimpan.</p></div>
+        <!-- EDIT: paragraf pembuka -->
+        <div class="story"><p class="preview">Ada hal-hal yang mungkin terlihat sederhana bagi orang lain, tetapi memiliki arti tersendiri bagi seseorang. Sebuah percakapan singkat, tawa yang muncul tanpa alasan, waktu yang dihabiskan bersama orang lain, atau hari biasa yang ternyata meninggalkan kesan luar biasa.</p></div>
+        <div class="more"><div>
+          <!-- EDIT: cerita lengkap -->
+          <div class="story">
+            <p>Bagiku, kenangan adalah bagian dari perjalanan yang tidak bisa diulang dengan cara yang sama. Waktu akan terus berjalan, keadaan bisa berubah, dan orang-orang mungkin tidak selalu berada di tempat yang sama. Namun, pengalaman yang pernah kita lalui tetap menjadi bagian dari cerita kita.</p>
+            <p>Tidak semua kenangan harus sempurna agar layak disimpan. Terkadang, justru momen-momen sederhana yang paling mudah muncul kembali dalam ingatan.</p>
+            <p>Ada hari yang ingin kuingat lebih lama, ada pengalaman yang memberiku pelajaran, dan ada waktu yang baru kusadari nilainya setelah semuanya berlalu.</p>
+            <p>Aku belajar bahwa menghargai kenangan bukan berarti terus hidup di masa lalu. Kita boleh mengingat sesuatu dengan senyuman, merindukan masa tertentu, lalu tetap melangkah menuju hari berikutnya.</p>
+            <p>Sebab, pada akhirnya, kehidupan bukan hanya tentang apa yang masih kita miliki hari ini, tetapi juga tentang berbagai pengalaman yang telah membentuk diri kita.</p>
+            <p>Dan jika suatu hari nanti aku melihat kembali halaman ini, aku berharap bisa tersenyum dan berkata bahwa semua bagian perjalanan itu memiliki tempatnya sendiri dalam hidupku.</p>
+          </div>
+        </div></div>
+        <button class="btn" type="button" aria-expanded="false"><span class="label">Read More</span><span class="plus">+</span></button>
+      </div>
+      <span class="node" aria-hidden="true"></span>
+    </article>
+
+    <!-- ========== 4. MY STRUGGLES ========== -->
+    <article class="entry rv" id="struggles">
+      <div class="card rv">
+        <div class="tag"><b>Bab IV</b><span>Tantangan</span></div>
+        <h2>My <em>Struggles</em></h2>
+        <figure><img src="img2.jpg" alt="Ilustrasi hitam putih wajah berambut perak, separuh tertutup bayangan" loading="lazy"><figcaption>Separuh terang, separuh bayangan</figcaption></figure>
+        <!-- EDIT: paragraf pembuka -->
+        <div class="story"><p class="preview">Tidak semua bagian kehidupan mudah untuk dijalani. Ada masa ketika semuanya terasa berjalan dengan baik, tetapi ada juga waktu ketika aku harus berhenti sejenak dan mencoba memahami apa yang sebenarnya sedang terjadi.</p></div>
+        <div class="more"><div>
+          <!-- EDIT: cerita lengkap -->
+          <div class="story">
+            <p>Aku belajar bahwa tidak semua hal bisa berjalan sesuai keinginan. Terkadang, sesuatu yang sudah direncanakan tidak berakhir seperti yang dibayangkan. Terkadang, aku harus menghadapi ketidakpastian dan menerima bahwa ada hal-hal yang berada di luar kendaliku.</p>
+            <p>Dalam perjalanan ini, aku mungkin pernah merasa ragu terhadap keputusan sendiri. Ada saat ketika aku terlalu banyak berpikir, mempertanyakan langkah yang kuambil, atau membandingkan perjalanan hidupku dengan perjalanan orang lain.</p>
+            <p>Namun, semakin aku memahami kehidupan, semakin aku menyadari bahwa setiap orang memiliki waktunya masing-masing. Tidak semua orang harus sampai di tujuan yang sama pada usia yang sama. Tidak semua perjalanan harus terlihat hebat agar memiliki arti.</p>
+            <p>Aku tidak harus selalu kuat setiap saat. Aku juga boleh beristirahat, mengevaluasi diri, dan mencoba kembali ketika sudah siap.</p>
+            <p>Bagiku, menghadapi kesulitan bukan berarti tidak pernah merasa lelah atau takut. Terkadang, keberanian justru terlihat dari kesediaan untuk tetap belajar meskipun hasilnya belum sesuai harapan.</p>
+            <p>Aku mungkin belum melewati semua tantangan yang akan datang. Tetapi aku ingin terus berkembang, mengambil pelajaran dari pengalaman, dan tidak membiarkan satu bagian sulit menentukan keseluruhan cerita hidupku.</p>
+          </div>
+        </div></div>
+        <button class="btn" type="button" aria-expanded="false"><span class="label">Read More</span><span class="plus">+</span></button>
+      </div>
+      <span class="node" aria-hidden="true"></span>
+    </article>
+
+    <!-- ========== 5. MY DREAMS ========== -->
+    <article class="entry rv" id="dreams">
+      <div class="card rv">
+        <div class="tag"><b>Bab V</b><span>Impian</span></div>
+        <h2>My <em>Dreams</em></h2>
+        <figure><img src="img5.jpg" alt="Ilustrasi hitam putih sosok berambut putih yang menutup wajah dengan tangan" loading="lazy"><figcaption>Menatap ke depan</figcaption></figure>
+        <!-- EDIT: paragraf pembuka -->
+        <div class="story"><p class="preview">Ada banyak hal yang ingin kucapai dalam hidup. Beberapa mungkin terlihat sederhana, sementara yang lain masih terasa jauh dari jangkauan. Namun, aku percaya bahwa setiap impian layak diperjuangkan selama aku bersedia belajar dan berusaha untuk mendekatinya.</p></div>
+        <div class="more"><div>
+          <!-- EDIT: cerita lengkap -->
+          <div class="story">
+            <p>Aku ingin menjadi seseorang yang lebih baik daripada diriku yang kemarin. Bukan untuk membuktikan sesuatu kepada semua orang, melainkan karena aku ingin melihat sejauh mana diriku bisa berkembang.</p>
+            <p>Aku ingin memiliki kehidupan yang bisa kubanggakan, membuat keputusan dengan lebih bijaksana, dan menemukan hal-hal yang benar-benar membuatku merasa hidup. Aku ingin memiliki kesempatan untuk mencoba banyak pengalaman baru, mengunjungi tempat-tempat yang belum pernah kudatangi, dan mengumpulkan cerita yang suatu hari nanti bisa kukenang.</p>
+            <p>Aku tahu bahwa impian tidak akan terwujud hanya dengan membayangkannya. Akan ada proses, kesalahan, waktu yang dibutuhkan, dan mungkin beberapa perubahan arah yang tidak pernah kurencanakan sebelumnya.</p>
+            <p>Karena itu, aku ingin belajar menikmati perjalanan, bukan hanya menunggu hasil akhirnya.</p>
+            <p>Aku tidak tahu persis seperti apa kehidupanku beberapa tahun dari sekarang. Mungkin akan ada banyak hal yang berubah. Mungkin ada impian yang berkembang menjadi sesuatu yang berbeda dari bayanganku hari ini.</p>
+            <p>Namun, aku berharap ketika saat itu tiba, aku bisa melihat kembali perjalanan ini dan menyadari bahwa setiap usaha kecil telah membawaku ke suatu tempat.</p>
+            <p>Aku belum sampai di sana. Tetapi aku sedang berjalan menuju ke sana.</p>
+          </div>
+        </div></div>
+        <button class="btn" type="button" aria-expanded="false"><span class="label">Read More</span><span class="plus">+</span></button>
+      </div>
+      <span class="node" aria-hidden="true"></span>
+    </article>
+
+    <!-- ========== 6. MY MESSAGE ========== -->
+    <article class="entry rv" id="message">
+      <div class="card rv">
+        <div class="tag"><b>Bab VI</b><span>Pesan untukmu</span></div>
+        <h2>My <em>Message</em></h2>
+        <figure class="color"><img src="img6.jpg" alt="Ilustrasi sosok berambut putih memegang kertas bergambar mata biru" loading="lazy"><figcaption>Untuk yang membaca</figcaption></figure>
+        <!-- EDIT: paragraf pembuka -->
+        <div class="story"><p class="preview">Untuk kamu yang telah meluangkan waktu membaca ceritaku, terima kasih sudah sampai sejauh ini.</p></div>
+        <div class="more"><div>
+          <!-- EDIT: cerita lengkap -->
+          <div class="story">
+            <p>Mungkin kamu mengenalku melalui halaman ini, mungkin juga kamu sudah mengenalku sebelumnya. Apa pun itu, aku ingin menyampaikan satu hal: tidak semua bagian dari seseorang bisa terlihat hanya dari apa yang ditampilkan di hadapan dunia.</p>
+            <p>Setiap orang memiliki cerita yang tidak selalu diceritakan, pemikiran yang tidak selalu diungkapkan, dan perjalanan yang tidak selalu bisa dipahami oleh orang lain.</p>
+            <p>Aku pun begitu. Halaman ini hanyalah sebagian kecil dari diriku, sebuah ruang untuk menyimpan cerita, memperkenalkan sisi diriku, dan mengingatkan bahwa aku juga sedang menjalani proses kehidupan.</p>
+            <p>Jika ada satu hal yang ingin kusampaikan, itu adalah jangan terlalu terburu-buru menentukan nilai dirimu berdasarkan pandangan orang lain. Kita semua sedang belajar dengan cara yang berbeda, melewati pengalaman yang berbeda, dan menemukan jalan kita masing-masing.</p>
+            <p>Tidak apa-apa jika hari ini kamu belum memiliki semua jawaban. Tidak apa-apa jika kamu masih mencari tahu apa yang sebenarnya kamu inginkan. Berikan dirimu waktu untuk tumbuh, mencoba, dan memahami kehidupan dengan lebih baik.</p>
+            <p>Untuk diriku sendiri, semoga aku tidak melupakan alasan mengapa aku memulai perjalanan ini. Semoga aku tetap memiliki keberanian untuk mencoba, kerendahan hati untuk belajar, dan kebijaksanaan untuk menerima hal-hal yang tidak bisa kuubah.</p>
+            <p>Dan untuk siapa pun yang membaca ini, semoga perjalananmu juga menemukan hal-hal yang layak diperjuangkan.</p>
+            <p>Ini adalah ceritaku, Biel Weakers.</p>
+            <p>My life, my story. And the story is still being written.</p>
+            <p class="sign">Biel Weakers</p>
+          </div>
+        </div></div>
+        <button class="btn" type="button" aria-expanded="false"><span class="label">Read More</span><span class="plus">+</span></button>
+      </div>
+      <span class="node" aria-hidden="true"></span>
+    </article>
+
+  </section>
+</main>
+
+<footer class="rv">My Life, My Story · Biel Weakers</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  root.classList.add('js');
+
+  // video latar
+  var v = document.getElementById('bgv');
+  if (v) {
+    if (reduce) { v.pause(); }
+    else { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+  }
+
+  // Read More
+  document.querySelectorAll('.card .btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var card = btn.closest('.card');
+      var open = card.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.querySelector('.label').textContent = open ? 'Read Less' : 'Read More';
+    });
+  });
+
+  // muncul saat scroll turun, hilang saat scroll naik
+  var items = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window && !reduce) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var el = e.target;
+        if (e.isIntersecting) {
+          el.classList.add('in');
+        } else if (e.boundingClientRect.top > 0) {
+          // elemen keluar lewat bawah layar = pengguna scroll naik
+          el.classList.remove('in');
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    items.forEach(function (el) { io.observe(el); });
+  } else {
+    items.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  // progres scroll dan garis timeline
+  var bar = document.getElementById('bar');
+  var tl = document.getElementById('timeline');
+  var ticking = false;
+  function update() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var s = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    bar.style.setProperty('--scroll', s.toFixed(4));
+    var r = tl.getBoundingClientRect();
+    var t = (window.innerHeight * 0.6 - r.top) / r.height;
+    tl.style.setProperty('--tl', Math.min(1, Math.max(0, t)).toFixed(4));
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+</body>
+</html>
